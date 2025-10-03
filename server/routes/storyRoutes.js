@@ -1,9 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const { getStories, getStory, createStory } = require("../controllers/storyController");
+const multer = require("multer");
+const path = require("path");
+const storyController = require("../controllers/storyController");
 
-router.get("/", getStories);
-router.get("/:id", getStory);
-router.post("/", createStory);
+// Multer setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, Date.now() + path.extname(file.originalname)),
+});
+const upload = multer({ storage });
+
+// Routes
+router.post("/", upload.single("image"), storyController.createStory);
+router.get("/", storyController.getAllStories);
+router.post("/:id/vote", storyController.voteStory);
+router.post("/:id/comment", storyController.addComment);
 
 module.exports = router;
