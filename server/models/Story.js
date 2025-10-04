@@ -5,8 +5,6 @@ const StorySchema = new mongoose.Schema(
     name: { type: String, required: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
-    imageUrl: { type: String },
-    thumbnailUrl: { type: String },
     votes: { type: Number, default: 0 },
     comments: [
       {
