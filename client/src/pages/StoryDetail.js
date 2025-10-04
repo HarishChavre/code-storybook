@@ -13,7 +13,7 @@ import {
 import { useParams } from "react-router-dom";
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000/stories";
+const API_BASE = "https://code-storybook.onrender.com/stories";
 
 const StoryDetails = () => {
   const { id } = useParams();

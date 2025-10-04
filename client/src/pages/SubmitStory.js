@@ -48,7 +48,7 @@ const SubmitStory = () => {
 
       
       const res = await axios.post(
-        "http://localhost:5000/stories",
+        "https://code-storybook.onrender.com/stories",
         { name, title, description },
         {
           headers: {
