@@ -16,22 +16,11 @@ const SubmitStory = () => {
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
   const [feedback, setFeedback] = useState({
     open: false,
     message: "",
     severity: "success",
   });
-
-  // Handle image selection
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,15 +35,28 @@ const SubmitStory = () => {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("title", title);
-      formData.append("description", description);
-      if (image) formData.append("image", image);
+      
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setFeedback({
+          open: true,
+          message: "You must be logged in to submit a story.",
+          severity: "error",
+        });
+        return;
+      }
 
-      const res = await axios.post("http://localhost:5000/stories", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      
+      const res = await axios.post(
+        "http://localhost:5000/stories",
+        { name, title, description },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, 
+          },
+        }
+      );
 
       setFeedback({
         open: true,
@@ -62,17 +64,15 @@ const SubmitStory = () => {
         severity: "success",
       });
 
-      // Reset form
+  
       setName("");
       setTitle("");
       setDescription("");
-      setImage(null);
-      setPreview(null);
     } catch (error) {
       console.error("Submission failed:", error);
       setFeedback({
         open: true,
-        message: "Something went wrong. Please try again.",
+        message: error.response?.data?.message || "Something went wrong. Please try again.",
         severity: "error",
       });
     }
@@ -94,9 +94,25 @@ const SubmitStory = () => {
             Everyone has a story to tell. Write yours and inspire others.
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <TextField label="Your Name" value={name} onChange={(e) => setName(e.target.value)} required fullWidth />
-            <TextField label="Story Title" value={title} onChange={(e) => setTitle(e.target.value)} required fullWidth />
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+          >
+            <TextField
+              label="Your Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              fullWidth
+            />
+            <TextField
+              label="Story Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              fullWidth
+            />
             <TextField
               label="Your Story"
               value={description}
@@ -106,22 +122,6 @@ const SubmitStory = () => {
               required
               fullWidth
             />
-
-            {/* Image upload */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              style={{ marginTop: "10px" }}
-            />
-            {preview && (
-              <Box
-                component="img"
-                src={preview}
-                alt="Preview"
-                sx={{ width: "100%", mt: 2, borderRadius: 2 }}
-              />
-            )}
 
             <Button type="submit" variant="contained" size="large" fullWidth sx={{ mt: 2 }}>
               Submit
@@ -136,7 +136,11 @@ const SubmitStory = () => {
         onClose={() => setFeedback({ ...feedback, open: false })}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert onClose={() => setFeedback({ ...feedback, open: false })} severity={feedback.severity} sx={{ width: "100%" }}>
+        <Alert
+          onClose={() => setFeedback({ ...feedback, open: false })}
+          severity={feedback.severity}
+          sx={{ width: "100%" }}
+        >
           {feedback.message}
         </Alert>
       </Snackbar>

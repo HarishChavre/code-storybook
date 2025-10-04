@@ -21,7 +21,7 @@ const StoryCard = ({ story, onVote }) => {
     if (type === "up") newVotes += 1;
     if (type === "down") newVotes -= 1;
     setVotes(newVotes);
-    if (onVote) onVote(story._id, type); // Optional backend call
+    if (onVote) onVote(story._id, type); 
   };
 
   return (

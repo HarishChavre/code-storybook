@@ -1,6 +1,5 @@
-// Footer.jsx
 import React from "react";
-import { Box, Typography, Link, Stack, IconButton } from "@mui/material";
+import { Box, Typography, Stack, IconButton } from "@mui/material";
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 
 const Footer = () => {
@@ -13,7 +12,7 @@ const Footer = () => {
 
   return (
     <Box component="footer" sx={styles.footer}>
-      {/* Logo and simple text */}
+  
       <Typography variant="h6" sx={styles.logo}>
         Code Story
       </Typography>
@@ -21,7 +20,7 @@ const Footer = () => {
         A platform where developers share stories through code.
       </Typography>
 
-      {/* Social Icons */}
+
       <Stack direction="row" spacing={1} sx={{ mt: 2, justifyContent: "center" }}>
         {socialLinks.map((item, index) => (
           <IconButton
@@ -37,7 +36,7 @@ const Footer = () => {
         ))}
       </Stack>
 
-      {/* Bottom Text */}
+      
       <Typography variant="body2" sx={styles.bottomText}>
         © {new Date().getFullYear()} Code Story. All rights reserved.
       </Typography>
@@ -45,7 +44,7 @@ const Footer = () => {
   );
 };
 
-/* Styles */
+
 const styles = {
   footer: {
     bgcolor: "#1f1f1f",

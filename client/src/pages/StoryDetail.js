@@ -8,6 +8,7 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Paper,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -21,13 +22,12 @@ const StoryDetails = () => {
   const [comment, setComment] = useState("");
   const [feedback, setFeedback] = useState({ open: false, message: "", severity: "success" });
 
-  // Fetch story details
+  
   const fetchStory = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(API_BASE);
-      const found = res.data.find((s) => s._id === id);
-      setStory(found);
+      const res = await axios.get(`${API_BASE}/${id}`);
+      setStory(res.data);
     } catch (err) {
       console.error(err);
       setFeedback({ open: true, message: "Failed to load story", severity: "error" });
@@ -40,23 +40,44 @@ const StoryDetails = () => {
     fetchStory();
   }, [id]);
 
-  // Voting
+
   const handleVote = async (type) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setFeedback({ open: true, message: "Login required to vote", severity: "error" });
+      return;
+    }
+
     try {
-      const res = await axios.post(`${API_BASE}/${id}/vote`, { type });
-      setStory({ ...story, votes: res.data.votes });
+      const res = await axios.post(
+        `${API_BASE}/${id}/vote`,
+        { type },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setStory((prev) => ({ ...prev, votes: res.data.votes }));
     } catch (err) {
       console.error(err);
       setFeedback({ open: true, message: "Failed to vote", severity: "error" });
     }
   };
 
-  // Add comment
+  
   const handleAddComment = async () => {
     if (!comment.trim()) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setFeedback({ open: true, message: "Login required to comment", severity: "error" });
+      return;
+    }
+
     try {
-      const res = await axios.post(`${API_BASE}/${id}/comment`, { user: "You", text: comment });
-      setStory({ ...story, comments: res.data });
+      const res = await axios.post(
+        `${API_BASE}/${id}/comment`,
+        { user: "You", text: comment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setStory((prev) => ({ ...prev, comments: res.data }));
       setComment("");
       setFeedback({ open: true, message: "Comment added!", severity: "success" });
     } catch (err) {
@@ -79,7 +100,7 @@ const StoryDetails = () => {
 
   return (
     <Container sx={{ py: 6 }}>
-      {/* Title & Author */}
+     
       <Typography variant="h3" sx={{ mb: 2 }}>
         {story.title}
       </Typography>
@@ -87,30 +108,12 @@ const StoryDetails = () => {
         By {story.name} | Votes: {story.votes || 0}
       </Typography>
 
-      {/* Images */}
-      {story.thumbnailUrl && (
-        <Box
-          component="img"
-          src={`http://localhost:5000${story.thumbnailUrl}`}
-          alt="Thumbnail"
-          sx={{ width: 200, mb: 2, borderRadius: 2 }}
-        />
-      )}
-      {story.imageUrl && (
-        <Box
-          component="img"
-          src={`http://localhost:5000${story.imageUrl}`}
-          alt="Story"
-          sx={{ width: "100%", mb: 4, borderRadius: 2 }}
-        />
-      )}
-
-      {/* Description */}
+      
       <Typography variant="body1" sx={{ mb: 4, lineHeight: 1.7 }}>
         {story.description}
       </Typography>
 
-      {/* Voting */}
+     
       <Box sx={{ display: "flex", gap: 2, mb: 4 }}>
         <Button variant="contained" color="success" onClick={() => handleVote("up")}>
           Upvote
@@ -120,32 +123,44 @@ const StoryDetails = () => {
         </Button>
       </Box>
 
-      {/* Comments Section */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Comments
+      
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Comments ({story.comments?.length || 0})
         </Typography>
+
         {(story.comments || []).length === 0 && (
-          <Typography color="text.secondary">No comments yet.</Typography>
+          <Typography color="text.secondary" sx={{ mb: 2 }}>
+            No comments yet. Be the first to comment!
+          </Typography>
         )}
+
         {(story.comments || []).map((c, i) => (
-          <Box
+          <Paper
             key={i}
+            elevation={1}
             sx={{
-              mb: 1,
-              p: 1.5,
-              border: "1px solid #ccc",
-              borderRadius: 1,
-              backgroundColor: "#f9f9f9",
+              mb: 2,
+              p: 2,
+              borderRadius: 2,
+              backgroundColor: "#f5f5f5",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
             }}
           >
-            <Typography variant="subtitle2">{c.user}</Typography>
-            <Typography variant="body2">{c.text}</Typography>
-          </Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+              {c.user}
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+              {c.text}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {c.createdAt ? new Date(c.createdAt).toLocaleString() : ""}
+            </Typography>
+          </Paper>
         ))}
       </Box>
 
-      {/* Add Comment */}
+    
       <Box sx={{ display: "flex", gap: 2 }}>
         <TextField
           label="Add a comment"
@@ -158,7 +173,7 @@ const StoryDetails = () => {
         </Button>
       </Box>
 
-      {/* Snackbar */}
+    
       <Snackbar
         open={feedback.open}
         autoHideDuration={3000}

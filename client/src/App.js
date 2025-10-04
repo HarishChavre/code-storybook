@@ -1,4 +1,4 @@
-// App.jsx
+
 import React, { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom"; 
 import Navbar from "./components/Navbar";
@@ -10,7 +10,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 const App = () => {
-  // Simple auth state (replace with real auth later)
+  
   const [user, setUser] = useState(null);
 
   const handleLogin = (userData) => {
@@ -25,7 +25,7 @@ const App = () => {
     <>
       <Navbar user={user} onLogout={handleLogout} />
       <Routes>
-        {/* Public routes */}
+        
         <Route 
           path="/login" 
           element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} 
@@ -35,7 +35,7 @@ const App = () => {
           element={user ? <Navigate to="/" /> : <Register onRegister={handleLogin} />} 
         />
 
-        {/* Protected routes */}
+
         <Route 
           path="/" 
           element={user ? <Home /> : <Navigate to="/login" />} 
@@ -49,7 +49,7 @@ const App = () => {
           element={user ? <StoryDetail /> : <Navigate to="/login" />} 
         />
 
-        {/* Fallback */}
+       
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <Footer />
